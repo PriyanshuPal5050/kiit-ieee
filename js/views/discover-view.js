@@ -260,15 +260,15 @@ export class DiscoverView {
         </div>
 
         <div class="p-5 pt-0 flex items-center gap-2">
-          <button data-event-id="${evt.id}" class="btn-card-detail flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-xs border border-white/10 transition-colors btn-press">
+          <button data-event-id="${evt.id}" class="btn-card-detail flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-xs border border-white/10 transition-colors btn-press cursor-pointer">
             View Details
           </button>
           ${isRegistered ? `
-            <button data-ticket-id="${evt.id}" class="btn-card-view-pass px-3 py-2.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-colors btn-press">
+            <button data-ticket-id="${evt.id}" class="btn-card-view-pass px-3 py-2.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-colors btn-press cursor-pointer z-10 relative">
               Pass ✓
             </button>
           ` : `
-            <button data-event-id="${evt.id}" class="btn-card-quick-reg px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all btn-press">
+            <button data-event-id="${evt.id}" class="btn-card-quick-reg px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all btn-press cursor-pointer z-10 relative">
               Register
             </button>
           `}
@@ -314,15 +314,15 @@ export class DiscoverView {
             <span class="text-xs font-bold text-emerald-400">${evt.priceLabel || 'Free'}</span>
           </div>
 
-          <button data-event-id="${evt.id}" class="btn-card-detail px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-xs border border-white/10 transition-colors btn-press">
+          <button data-event-id="${evt.id}" class="btn-card-detail px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-xs border border-white/10 transition-colors btn-press cursor-pointer">
             Details
           </button>
           ${isRegistered ? `
-            <button data-ticket-id="${evt.id}" class="btn-card-view-pass px-4 py-2.5 rounded-xl bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold btn-press">
+            <button data-ticket-id="${evt.id}" class="btn-card-view-pass px-4 py-2.5 rounded-xl bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold btn-press cursor-pointer z-10 relative">
               Pass ✓
             </button>
           ` : `
-            <button data-event-id="${evt.id}" class="btn-card-quick-reg px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 btn-press">
+            <button data-event-id="${evt.id}" class="btn-card-quick-reg px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 btn-press cursor-pointer z-10 relative">
               Register
             </button>
           `}
@@ -332,11 +332,45 @@ export class DiscoverView {
   }
 
   bindEvents() {
+    // Delegated container click handler for card actions
+    this.container.addEventListener('click', (e) => {
+      const regBtn = e.target.closest('.btn-card-quick-reg');
+      if (regBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = regBtn.getAttribute('data-event-id');
+        sound.playClick();
+        window.appDispatcher?.openRegistration(id);
+        return;
+      }
+
+      const passBtn = e.target.closest('.btn-card-view-pass');
+      if (passBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const evtId = passBtn.getAttribute('data-ticket-id');
+        sound.playClick();
+        window.appDispatcher?.openTicketModal(evtId);
+        return;
+      }
+
+      const detailBtn = e.target.closest('.btn-card-detail');
+      if (detailBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = detailBtn.getAttribute('data-event-id');
+        sound.playClick();
+        window.location.hash = `#event/${id}`;
+        return;
+      }
+    });
+
     // Search input
     const searchInput = this.container.querySelector('#discover-search-input');
     if (searchInput) {
       searchInput.addEventListener('input', () => {
         store.setSearchQuery(searchInput.value);
+        this.render();
       });
     }
 
@@ -412,16 +446,16 @@ export class DiscoverView {
       });
     }
 
-    // Card Details
+    // Direct card action bindings
     this.container.querySelectorAll('.btn-card-detail').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const id = btn.getAttribute('data-event-id');
         sound.playClick();
         window.location.hash = `#event/${id}`;
       });
     });
 
-    // Card Register
     this.container.querySelectorAll('.btn-card-quick-reg').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -432,7 +466,6 @@ export class DiscoverView {
       });
     });
 
-    // Card View Pass
     this.container.querySelectorAll('.btn-card-view-pass').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();

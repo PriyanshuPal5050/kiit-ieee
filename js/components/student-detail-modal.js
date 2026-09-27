@@ -17,10 +17,16 @@ export class StudentDetailModal {
 
   init() {
     if (!this.container) {
-      this.container = document.createElement('div');
-      this.container.id = 'student-detail-modal-root';
-      document.body.appendChild(this.container);
+      let el = document.getElementById('student-detail-modal-root');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'student-detail-modal-root';
+        document.body.appendChild(el);
+      }
+      this.container = el;
     }
+    this.container.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden overflow-y-auto';
+    this.container.style.display = 'none';
   }
 
   open(ticketId) {
@@ -29,6 +35,9 @@ export class StudentDetailModal {
     this.currentTicket = reg;
     this.isOpen = true;
     this.render();
+    this.container.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop overflow-y-auto';
+    this.container.classList.remove('hidden');
+    this.container.style.display = 'flex';
     this._handleKeydown = (e) => {
       if (e.key === 'Escape') this.close();
     };
@@ -41,7 +50,11 @@ export class StudentDetailModal {
       window.removeEventListener('keydown', this._handleKeydown);
       this._handleKeydown = null;
     }
-    if (this.container) this.container.innerHTML = '';
+    if (this.container) {
+      this.container.classList.add('hidden');
+      this.container.style.display = 'none';
+      this.container.innerHTML = '';
+    }
   }
 
   render() {

@@ -1,5 +1,24 @@
 [
   {
+    "ticketId": "KIIT-IEEE-2026-CYBE7595",
+    "eventId": "evt-cyber-redteam-2026",
+    "eventName": "Cybersecurity Red Team Defense & CTF Lab",
+    "studentName": "Aryan Mohapatra",
+    "rollNo": "22051842",
+    "branch": "Computer Science & Engineering",
+    "year": "3rd Year",
+    "email": "22051842@kiit.ac.in",
+    "phone": "+91 98765 43210",
+    "track": "Cybersecurity",
+    "tshirtSize": "L",
+    "bench": "Bench B23",
+    "team": "Unassigned",
+    "status": "Confirmed",
+    "attended": true,
+    "registeredAt": "2026-09-27T12:48:50.155653Z",
+    "attendedAt": "2026-09-27T12:48:54.216153Z"
+  },
+  {
     "ticketId": "KIIT-IEEE-2026-ROBO7163",
     "eventId": "evt-robotics-esp32-2026",
     "eventName": "Autonomous Robotics & ESP32-S3 IoT Lab",

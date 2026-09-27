@@ -532,7 +532,40 @@ Get-PnpDevice -Class "Ports"</code></pre>
     const ctaReady = this.container.querySelector('#cta-btn-check-ready');
     if (ctaReady) ctaReady.addEventListener('click', () => store.setView('readiness'));
 
-    // Event card actions
+    // Delegated container click handler for home event cards
+    this.container.addEventListener('click', (e) => {
+      const regBtn = e.target.closest('.btn-card-register');
+      if (regBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = regBtn.getAttribute('data-event-register');
+        sound.playClick();
+        window.appDispatcher?.openRegistration(id);
+        return;
+      }
+
+      const passBtn = e.target.closest('.btn-card-registered');
+      if (passBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = passBtn.getAttribute('data-event-registered');
+        sound.playClick();
+        window.appDispatcher?.openTicketModal(id);
+        return;
+      }
+
+      const detailBtn = e.target.closest('.btn-card-detail');
+      if (detailBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = detailBtn.getAttribute('data-event-detail');
+        sound.playClick();
+        window.location.hash = `#event/${id}`;
+        return;
+      }
+    });
+
+    // Direct event card actions
     this.container.querySelectorAll('.btn-card-detail').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-event-detail');

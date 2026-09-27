@@ -18,15 +18,17 @@ export class VolunteerModal {
     if (!el) {
       el = document.createElement('div');
       el.id = 'volunteer-modal-root';
-      el.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden overflow-y-auto';
       document.body.appendChild(el);
     }
+    el.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden overflow-y-auto';
+    el.style.display = 'none';
     this.modal = el;
   }
 
   open() {
     this.render();
     this.modal.classList.remove('hidden');
+    this.modal.style.display = 'flex';
     sound.playClick();
     this._handleKeydown = (e) => {
       if (e.key === 'Escape') this.close();
@@ -36,6 +38,7 @@ export class VolunteerModal {
 
   close() {
     this.modal.classList.add('hidden');
+    this.modal.style.display = 'none';
     if (this._handleKeydown) {
       window.removeEventListener('keydown', this._handleKeydown);
       this._handleKeydown = null;

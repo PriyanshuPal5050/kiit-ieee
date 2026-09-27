@@ -23,6 +23,7 @@ export class EventDetailModal {
       document.body.appendChild(el);
     }
     el.className = 'fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 modal-backdrop hidden overflow-y-auto';
+    el.style.display = 'none';
     this.modal = el;
 
     // Dismiss on outside backdrop click
@@ -56,6 +57,7 @@ export class EventDetailModal {
 
     this.render();
     this.modal.classList.remove('hidden');
+    this.modal.style.display = 'flex';
     sound.playClick();
 
     if (this.escHandler) window.removeEventListener('keydown', this.escHandler);
@@ -69,6 +71,7 @@ export class EventDetailModal {
 
   close() {
     this.modal.classList.add('hidden');
+    this.modal.style.display = 'none';
     if (this.escHandler) {
       window.removeEventListener('keydown', this.escHandler);
       this.escHandler = null;

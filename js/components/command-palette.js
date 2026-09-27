@@ -36,6 +36,7 @@ export class CommandPalette {
     const el = document.createElement('div');
     el.id = 'command-palette-modal';
     el.className = 'fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 modal-backdrop hidden transition-opacity duration-200';
+    el.style.display = 'none';
     el.innerHTML = `
       <div class="relative w-full max-w-2xl bg-slate-900/95 border border-indigo-500/30 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col transform transition-transform duration-200 scale-95 opacity-0" id="palette-card">
         <!-- Search Input Bar -->
@@ -222,6 +223,7 @@ export class CommandPalette {
   open() {
     this.isOpen = true;
     this.modal.classList.remove('hidden');
+    this.modal.style.display = 'flex';
     requestAnimationFrame(() => {
       this.card.classList.remove('scale-95', 'opacity-0');
       this.card.classList.add('scale-100', 'opacity-100');
@@ -237,6 +239,7 @@ export class CommandPalette {
     this.card.classList.add('scale-95', 'opacity-0');
     setTimeout(() => {
       this.modal.classList.add('hidden');
+      this.modal.style.display = 'none';
     }, 180);
   }
 

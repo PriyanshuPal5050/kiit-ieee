@@ -26,9 +26,10 @@ export class QRScannerModal {
     if (!el) {
       el = document.createElement('div');
       el.id = 'qr-scanner-modal-root';
-      el.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden overflow-y-auto';
       document.body.appendChild(el);
     }
+    el.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden overflow-y-auto';
+    el.style.display = 'none';
     this.modal = el;
 
     this.modal.addEventListener('click', (e) => {
@@ -46,6 +47,7 @@ export class QRScannerModal {
 
     this.render();
     this.modal.classList.remove('hidden');
+    this.modal.style.display = 'flex';
     sound.playClick();
 
     if (this.isHostAuthorized()) {
@@ -64,6 +66,7 @@ export class QRScannerModal {
   close() {
     this.stopCamera();
     this.modal.classList.add('hidden');
+    this.modal.style.display = 'none';
     if (this.escHandler) {
       window.removeEventListener('keydown', this.escHandler);
       this.escHandler = null;
