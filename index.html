@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KIIT IEEE — Where Students Build What’s Next.</title>
+  <meta name="description" content="AI-powered student event management platform and intelligent event operating system for the KIIT IEEE student community." />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="KIIT IEEE — Where Students Build What’s Next." />
+  <meta property="og:description" content="AI-powered student event management platform for workshops, hackathons, robotics bootcamps, and verified credentials." />
+  <meta property="og:type" content="website" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS via Official CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- External Libraries (Confetti & Chart.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body class="bg-[#07090e] text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white">
+
+  <!-- Top Navigation Mount -->
+  <header id="navbar-root"></header>
+
+  <!-- Main View Routing Mount -->
+  <main id="app-main-content" class="min-h-screen"></main>
+
+  <!-- Modals and Portals Mounts -->
+  <div id="toast-container"></div>
+  <div id="registration-modal-root"></div>
+  <div id="event-detail-modal-root"></div>
+  <div id="ticket-modal-root"></div>
+  <div id="qr-scanner-modal-root"></div>
+  <div id="volunteer-modal-root"></div>
+  <div id="profile-modal-root"></div>
+  <div id="auth-modal-root"></div>
+  <div id="student-detail-modal-root"></div>
+
+  <!-- Main ES Module Bootstrap -->
+  <script type="module" src="./js/app.js"></script>
+
+</body>
+</html>
