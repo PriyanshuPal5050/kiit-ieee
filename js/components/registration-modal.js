@@ -54,7 +54,8 @@ export class RegistrationModal {
     // 2. Locate Event
     this.event = store.events.find(e => 
       String(e.id).toLowerCase() === String(eventId).toLowerCase() || 
-      (e.slug && String(e.slug).toLowerCase() === String(eventId).toLowerCase())
+      (e.slug && String(e.slug).toLowerCase() === String(eventId).toLowerCase()) ||
+      (e.title && String(e.title).toLowerCase() === String(eventId).toLowerCase())
     );
 
     if (!this.event) {
@@ -79,7 +80,8 @@ export class RegistrationModal {
     // 3. Check for Duplicate Registration
     const existing = store.registrations.find(r => 
       (String(r.eventId).toLowerCase() === String(this.event.id).toLowerCase() || 
-       (this.event.slug && String(r.eventId).toLowerCase() === String(this.event.slug).toLowerCase())) &&
+       (this.event.slug && String(r.eventId).toLowerCase() === String(this.event.slug).toLowerCase()) ||
+       (this.event.title && String(r.eventName).toLowerCase() === String(this.event.title).toLowerCase())) &&
       (String(r.rollNo).toLowerCase() === String(store.user.rollNo).toLowerCase() ||
        (store.user.email && String(r.email).toLowerCase() === String(store.user.email).toLowerCase()))
     );
@@ -313,13 +315,70 @@ export class RegistrationModal {
       const origin = window.location.origin && window.location.origin !== 'null' && !window.location.origin.includes('file:') ? window.location.origin : 'http://localhost:3000';
       const endpoint = `${origin}/api/events/${encodeURIComponent(this.event.id)}/register`;
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          eventId: this.event.id,
-          eventName: this.event.title,
-          studentName: store.user.name,
+      let backendSuccess = false;
+      let registration = null;
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            eventId: this.event.id,
+            eventName: this.event.title,
+            studentName: store.user.name,
+            rollNo: store.user.rollNo,
+            email: store.user.email,
+            branch: store.user.branch,
+            year: store.user.year,
+            phone: store.user.phone || '+91 98765 43210',
+            track: this.event.category || 'Technical Track',
+            tshirtSize: 'L'
+          })
+        });
+        clearTimeout(timeoutId);
+
+        const data = await response.json();
+
+        if (response.ok && data.success && data.registration) {
+          backendSuccess = true;
+          registration = data.registration;
+          if (data.event && this.event) {
+            this.event.seatsFilled = data.event.seatsFilled;
+            this.event.status = data.event.status || this.event.status;
+          }
+        } else if (response.status === 409) {
+          toast.show({
+            title: 'Already Registered',
+            message: "✓ You're already registered for this event.",
+            type: 'info'
+          });
+          this.close();
+          const tkt = (data.registration && data.registration.ticketId) || 'KIIT-IEEE-2026-PASS';
+          window.appDispatcher?.openTicketModal(tkt);
+          return;
+        } else if (response.status === 403) {
+          toast.show({
+            title: 'Registration Blocked',
+            message: data.error || 'Server rejected registration.',
+            type: 'error'
+          });
+          if (confirmBtn) confirmBtn.disabled = false;
+          if (confirmText) confirmText.textContent = 'Confirm Registration';
+          this.isSubmitting = false;
+          return;
+        }
+      } catch (netErr) {
+        console.warn('[RegistrationModal] Backend registration unreachable, using reactive local registration:', netErr);
+      }
+
+      if (!backendSuccess || !registration) {
+        // Fallback to reactive store registration
+        const localResult = store.registerForEvent(this.event.id, {
+          fullName: store.user.name,
           rollNo: store.user.rollNo,
           email: store.user.email,
           branch: store.user.branch,
@@ -327,61 +386,46 @@ export class RegistrationModal {
           phone: store.user.phone || '+91 98765 43210',
           track: this.event.category || 'Technical Track',
           tshirtSize: 'L'
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 409) {
-          toast.show({
-            title: 'Already Registered',
-            message: "✓ You're already registered for this event.",
-            type: 'info'
-          });
-          this.close();
-          const tkt = (data.registration && data.registration.ticketId) || 'KIIT-IEEE-2026-AI99';
-          window.appDispatcher?.openTicketModal(tkt);
-          return;
-        }
-
-        toast.show({
-          title: 'Registration Blocked',
-          message: data.error || 'Server rejected registration.',
-          type: 'error'
         });
 
-        if (confirmBtn) confirmBtn.disabled = false;
-        if (confirmText) confirmText.textContent = 'Confirm Registration';
-        this.isSubmitting = false;
-        return;
-      }
-
-      // Registration successful in backend database
-      const registration = data.registration;
-
-      // Synchronize in reactive state store
-      const existingIdx = store.registrations.findIndex(r => r.ticketId === registration.ticketId);
-      if (existingIdx >= 0) {
-        store.registrations[existingIdx] = registration;
-      } else {
-        store.registrations.unshift(registration);
-      }
-
-      // Update seat capacity in local event
-      if (this.event) {
-        this.event.seatsFilled = (data.event && data.event.seatsFilled) ? data.event.seatsFilled : ((this.event.seatsFilled || 0) + 1);
-        if (this.event.seatsFilled >= this.event.seatsTotal) {
-          this.event.status = 'FULL';
-        } else if (this.event.seatsFilled >= this.event.seatsTotal * 0.8) {
-          this.event.status = 'ALMOST FULL';
+        if (!localResult.success) {
+          if (localResult.ticket) {
+            toast.show({
+              title: 'Already Registered',
+              message: "✓ You're already registered for this event.",
+              type: 'info'
+            });
+            this.close();
+            window.appDispatcher?.openTicketModal(localResult.ticket.ticketId);
+            return;
+          }
+          toast.show({
+            title: 'Registration Notice',
+            message: localResult.error || 'Could not complete registration.',
+            type: 'warning'
+          });
+          if (confirmBtn) confirmBtn.disabled = false;
+          if (confirmText) confirmText.textContent = 'Confirm Registration';
+          this.isSubmitting = false;
+          return;
         }
+        registration = localResult.ticket;
+      } else {
+        // Synchronize backend registration into store
+        const existingIdx = store.registrations.findIndex(r => r.ticketId === registration.ticketId);
+        if (existingIdx >= 0) {
+          store.registrations[existingIdx] = registration;
+        } else {
+          store.registrations.unshift(registration);
+        }
+        if (this.event) {
+          this.event.seatsFilled = (this.event.seatsFilled || 0) + 1;
+        }
+        store.save();
+        store.awardXp(100, `Registered for "${this.event.title}"`);
+        store.addAuditLog(store.user.name, `Registered for ${this.event.title}`, registration.ticketId);
+        store.notify('REGISTRATION_CREATED', registration);
       }
-
-      store.save();
-      store.awardXp(100, `Registered for "${this.event.title}"`);
-      store.addAuditLog(store.user.name, `Registered for ${this.event.title}`, registration.ticketId);
-      store.notify('REGISTRATION_CREATED', registration);
 
       // Trigger Confetti Burst
       if (typeof confetti === 'function') {
@@ -393,10 +437,23 @@ export class RegistrationModal {
       this.renderSuccess(registration);
 
     } catch (err) {
-      console.error('[RegistrationModal] Network error:', err);
+      console.error('[RegistrationModal] Unexpected error:', err);
+      try {
+        const fallback = store.registerForEvent(this.event.id, {
+          fullName: store.user.name,
+          rollNo: store.user.rollNo,
+          email: store.user.email
+        });
+        if (fallback.success && fallback.ticket) {
+          sound.playSuccess();
+          this.renderSuccess(fallback.ticket);
+          return;
+        }
+      } catch (e2) {}
+
       toast.show({
-        title: 'Network Error',
-        message: 'Unable to reach backend registration service. Please check connection.',
+        title: 'Registration Error',
+        message: 'Could not complete registration. Please try again.',
         type: 'error'
       });
       if (confirmBtn) confirmBtn.disabled = false;

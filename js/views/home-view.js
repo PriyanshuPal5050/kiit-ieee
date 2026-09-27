@@ -428,7 +428,13 @@ Get-PnpDevice -Class "Ports"</code></pre>
   }
 
   renderEventCard(evt) {
-    const isRegistered = store.registrations.some(r => r.eventId === evt.id);
+    const isRegistered = store.registrations.some(r => 
+      (String(r.eventId).toLowerCase() === String(evt.id).toLowerCase() ||
+       (evt.slug && String(r.eventId).toLowerCase() === String(evt.slug).toLowerCase()) ||
+       (evt.title && String(r.eventName).toLowerCase() === String(evt.title).toLowerCase())) &&
+      (String(r.rollNo).toLowerCase() === String(store.user?.rollNo || '').toLowerCase() ||
+       (store.user?.email && String(r.email).toLowerCase() === String(store.user?.email || '').toLowerCase()))
+    );
     const seatsPct = Math.round(((evt.seatsFilled || 0) / evt.seatsTotal) * 100);
 
     return `
@@ -458,7 +464,7 @@ Get-PnpDevice -Class "Ports"</code></pre>
               </div>
               <div class="flex items-center gap-1.5">
                 <span>👤</span>
-                <span class="text-slate-300 font-medium">${evt.speaker.name}</span>
+                <span class="text-slate-300 font-medium">${evt.speaker ? evt.speaker.name : 'IEEE Mentor'}</span>
               </div>
             </div>
 
@@ -466,7 +472,7 @@ Get-PnpDevice -Class "Ports"</code></pre>
             <div class="pt-2 space-y-1">
               <div class="flex justify-between text-[11px] font-medium">
                 <span class="text-slate-400">Lab Capacity</span>
-                <span class="font-mono text-cyan-400 font-bold">${evt.seatsFilled} / ${evt.seatsTotal} Seats</span>
+                <span class="font-mono text-cyan-400 font-bold">${evt.seatsFilled || 0} / ${evt.seatsTotal || 120} Seats</span>
               </div>
               <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
                 <div class="bg-gradient-to-r from-indigo-500 to-cyan-400 h-full rounded-full transition-all duration-500" style="width: ${seatsPct}%"></div>
@@ -481,11 +487,11 @@ Get-PnpDevice -Class "Ports"</code></pre>
             Learn More
           </button>
           ${isRegistered ? `
-            <button data-event-registered="${evt.id}" class="btn-card-registered px-4 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-xs">
-              ✓ Pass Ready
+            <button data-event-registered="${evt.id}" class="btn-card-registered px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer btn-press transition-all flex items-center justify-center gap-1.5 shadow-sm">
+              <span>✓ Pass Ready</span>
             </button>
           ` : `
-            <button data-event-register="${evt.id}" class="btn-card-register px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition-colors btn-press">
+            <button data-event-register="${evt.id}" class="btn-card-register px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition-colors btn-press cursor-pointer">
               Register
             </button>
           `}
@@ -536,7 +542,9 @@ Get-PnpDevice -Class "Ports"</code></pre>
     });
 
     this.container.querySelectorAll('.btn-card-register').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const id = btn.getAttribute('data-event-register');
         sound.playClick();
         window.appDispatcher?.openRegistration(id);
@@ -544,26 +552,12 @@ Get-PnpDevice -Class "Ports"</code></pre>
     });
 
     this.container.querySelectorAll('.btn-card-registered').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const id = btn.getAttribute('data-event-registered');
-        const reg = store.registrations.find(r => 
-          String(r.eventId).toLowerCase() === String(id).toLowerCase() ||
-          (r.slug && String(r.slug).toLowerCase() === String(id).toLowerCase())
-        );
-        if (reg) {
-          sound.playClick();
-          window.appDispatcher?.openTicketModal(reg.ticketId);
-        } else {
-          const evt = store.events.find(e => String(e.id).toLowerCase() === String(id).toLowerCase());
-          const altReg = store.registrations.find(r => 
-            (evt && evt.slug && String(r.eventId).toLowerCase() === String(evt.slug).toLowerCase()) ||
-            (evt && String(r.eventName).toLowerCase() === String(evt.title).toLowerCase())
-          );
-          if (altReg) {
-            sound.playClick();
-            window.appDispatcher?.openTicketModal(altReg.ticketId);
-          }
-        }
+        sound.playClick();
+        window.appDispatcher?.openTicketModal(id);
       });
     });
 

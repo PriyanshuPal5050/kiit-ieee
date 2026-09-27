@@ -37,19 +37,72 @@ export class TicketModal {
     });
   }
 
-  open(ticketId) {
-    if (!ticketId) return;
-    this.registration = store.registrations.find(r => 
-      String(r.ticketId).trim().toUpperCase() === String(ticketId).trim().toUpperCase()
+  open(ticketIdOrEventId) {
+    if (!ticketIdOrEventId) return;
+
+    const query = String(ticketIdOrEventId).trim();
+    const queryUpper = query.toUpperCase();
+    const queryLower = query.toLowerCase();
+
+    // 1. Match by exact ticketId
+    let reg = store.registrations.find(r => 
+      String(r.ticketId || '').trim().toUpperCase() === queryUpper
     );
-    if (!this.registration) {
-      toast.show({ title: 'Ticket Not Found', message: `Ticket ID "${ticketId}" could not be located.`, type: 'error' });
+
+    // 2. Match by eventId or slug for the current authenticated user first
+    if (!reg) {
+      reg = store.registrations.find(r => 
+        (String(r.eventId || '').toLowerCase() === queryLower ||
+         (r.slug && String(r.slug).toLowerCase() === queryLower)) &&
+        (String(r.rollNo || '').toLowerCase() === String(store.user?.rollNo || '').toLowerCase() ||
+         (store.user?.email && String(r.email || '').toLowerCase() === String(store.user.email).toLowerCase()))
+      );
+    }
+
+    // 3. Match by event title for current user
+    if (!reg) {
+      reg = store.registrations.find(r => 
+        String(r.eventName || '').toLowerCase() === queryLower &&
+        (String(r.rollNo || '').toLowerCase() === String(store.user?.rollNo || '').toLowerCase())
+      );
+    }
+
+    // 4. Match by eventId, slug, or title for any user (fallback)
+    if (!reg) {
+      reg = store.registrations.find(r => 
+        String(r.eventId || '').toLowerCase() === queryLower ||
+        (r.slug && String(r.slug).toLowerCase() === queryLower) ||
+        String(r.eventName || '').toLowerCase() === queryLower
+      );
+    }
+
+    // 5. Match by linked event
+    if (!reg) {
+      const evt = store.events.find(e => 
+        String(e.id || '').toLowerCase() === queryLower ||
+        (e.slug && String(e.slug).toLowerCase() === queryLower) ||
+        String(e.title || '').toLowerCase() === queryLower
+      );
+      if (evt) {
+        reg = store.registrations.find(r => 
+          String(r.eventId || '').toLowerCase() === String(evt.id).toLowerCase() ||
+          (evt.slug && String(r.eventId || '').toLowerCase() === String(evt.slug).toLowerCase()) ||
+          String(r.eventName || '').toLowerCase() === String(evt.title).toLowerCase()
+        );
+      }
+    }
+
+    if (!reg) {
+      toast.show({ title: 'Pass Not Found', message: `No active pass found for "${ticketIdOrEventId}".`, type: 'info' });
       return;
     }
 
+    this.registration = reg;
+
     this.currentEvent = store.events.find(e => 
       String(e.id).toLowerCase() === String(this.registration.eventId).toLowerCase() ||
-      (e.slug && String(e.slug).toLowerCase() === String(this.registration.eventId).toLowerCase())
+      (e.slug && String(e.slug).toLowerCase() === String(this.registration.eventId).toLowerCase()) ||
+      String(e.title).toLowerCase() === String(this.registration.eventName || '').toLowerCase()
     ) || {
       id: this.registration.eventId,
       title: this.registration.eventName || 'KIIT IEEE Technical Workshop',

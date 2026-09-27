@@ -1170,11 +1170,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 events = load_events()
                 matched_evt = next((e for e in events if str(e.get('id', '')).lower() == event_id.lower() or str(e.get('slug', '')).lower() == event_id.lower() or str(e.get('title', '')).lower() == event_id.lower()), None)
                 if not matched_evt:
-                    self.send_json_response(404, {
-                        "success": False,
-                        "error": f"Event '{event_id}' not found in database."
-                    })
-                    return
+                    evt_title = (data.get('eventName') or data.get('title') or event_id.replace('evt-', '').replace('-', ' ').title()).strip()
+                    matched_evt = {
+                        "id": event_id if event_id.startswith('evt-') else f"evt-{event_id}",
+                        "slug": slugify(evt_title),
+                        "title": evt_title,
+                        "category": data.get('track') or "Technical Workshop",
+                        "status": "OPEN",
+                        "seatsTotal": int(data.get('seatsTotal') or 150),
+                        "seatsFilled": int(data.get('seatsFilled') or 0),
+                        "publishedAt": datetime.datetime.utcnow().isoformat() + "Z"
+                    }
+                    events.append(matched_evt)
+                    save_events(events)
 
                 # Validate Event Status
                 evt_status = str(matched_evt.get('status', 'OPEN')).upper()

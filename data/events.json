@@ -114,7 +114,7 @@
       "org": "AeroBotix Systems"
     },
     "seatsTotal": 100,
-    "seatsFilled": 98,
+    "seatsFilled": 99,
     "eligibility": "Open to all KIIT students with an interest in robotics and microcontrollers.",
     "registrationDeadline": "2026-10-17",
     "publishedAt": "2026-09-26T12:00:00Z"
@@ -222,5 +222,101 @@
     ],
     "whatWillLearn": "Superposition, entanglement, quantum gates, and Qiskit simulator deployment.",
     "whatToBring": "Personal laptop with Python 3.11 installed."
+  },
+  {
+    "id": "evt-web3-cloud-2026",
+    "slug": "nextjs-15-autonomous-ai-agent-systems",
+    "title": "Next.js 15 & Autonomous AI Agent Systems",
+    "tagline": "Modern full-stack engineering: server actions, streaming UI, vector stores, and LangChain agents.",
+    "category": "Web & Cloud",
+    "format": "Online",
+    "eventType": "Workshop",
+    "difficulty": "Intermediate",
+    "price": 0,
+    "priceLabel": "Free",
+    "date": "Oct 24, 2026",
+    "startDate": "2026-10-24",
+    "endDate": "2026-10-24",
+    "time": "02:00 PM - 06:30 PM IST",
+    "startTime": "14:00",
+    "endTime": "18:30",
+    "reportingTime": "01:30 PM",
+    "venue": "Google Meet & Live Interactive Sandbox",
+    "campus": "Online",
+    "building": "Virtual Sandbox",
+    "room": "Interactive Lab",
+    "bannerGradient": "from-blue-600 via-indigo-600 to-violet-700",
+    "badgeColor": "badge-web3",
+    "featured": false,
+    "status": "OPEN",
+    "speaker": {
+      "name": "Saurabh Nayak",
+      "role": "Staff Engineer & Open Source Maintainer",
+      "org": "Vercel Community Leader",
+      "bio": "Built scalable web platforms serving millions of requests; specializes in TypeScript and LLM application stacks."
+    },
+    "seatsTotal": 250,
+    "seatsFilled": 181,
+    "eligibility": "Any student with basic HTML/CSS/JavaScript experience.",
+    "prerequisites": [
+      "Modern JavaScript/TypeScript basics",
+      "Node.js 20+ installed"
+    ],
+    "whatYouWillBuild": [
+      "A production-grade AI documentation analyst with live streaming answers",
+      "Deployed full-stack app on Vercel with serverless database"
+    ],
+    "tags": [
+      "Next.js 15",
+      "TypeScript",
+      "Tailwind",
+      "AI Agents",
+      "Vercel"
+    ],
+    "publishedAt": "2026-09-26T14:00:00Z"
+  },
+  {
+    "id": "evt-cyber-redteam-2026",
+    "slug": "cybersecurity-red-team-defense-ctf-lab",
+    "title": "Cybersecurity Red Team Defense & CTF Lab",
+    "tagline": "Master ethical penetration testing, binary analysis, and real-time defense against zero-day exploits.",
+    "category": "Cybersecurity",
+    "format": "Offline",
+    "eventType": "Lab",
+    "difficulty": "Advanced",
+    "price": 0,
+    "priceLabel": "Free",
+    "date": "Nov 14, 2026",
+    "startDate": "2026-11-14",
+    "endDate": "2026-11-14",
+    "time": "10:00 AM - 05:00 PM IST",
+    "startTime": "10:00",
+    "endTime": "17:00",
+    "reportingTime": "09:00 AM",
+    "venue": "Cyber Defense Center, Campus 17, KIIT",
+    "campus": "Campus 17",
+    "building": "School of Computer Engineering",
+    "room": "Cyber Defense Center",
+    "bannerGradient": "from-red-600 via-rose-700 to-zinc-900",
+    "badgeColor": "badge-hackathon",
+    "featured": false,
+    "status": "ALMOST FULL",
+    "speaker": {
+      "name": "Capt. Arvind Verma",
+      "role": "Offensive Security Certified Expert (OSCE)",
+      "org": "IEEE Computer Society Cyber Group",
+      "bio": "Bug bounty hunter in Top 50 global rankings; conducted corporate red team audits across Fortune 500 banks."
+    },
+    "seatsTotal": 80,
+    "seatsFilled": 78,
+    "eligibility": "Prior exposure to Linux command line and networking fundamentals.",
+    "tags": [
+      "Security",
+      "CTF",
+      "Ethical Hacking",
+      "Kali Linux",
+      "Wireshark"
+    ],
+    "publishedAt": "2026-09-26T11:00:00Z"
   }
 ]

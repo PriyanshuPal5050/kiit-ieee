@@ -182,7 +182,13 @@ export class DiscoverView {
   }
 
   renderGridCard(evt) {
-    const isRegistered = store.registrations.some(r => r.eventId === evt.id);
+    const isRegistered = store.registrations.some(r => 
+      (String(r.eventId).toLowerCase() === String(evt.id).toLowerCase() ||
+       (evt.slug && String(r.eventId).toLowerCase() === String(evt.slug).toLowerCase()) ||
+       (evt.title && String(r.eventName).toLowerCase() === String(evt.title).toLowerCase())) &&
+      (String(r.rollNo).toLowerCase() === String(store.user?.rollNo || '').toLowerCase() ||
+       (store.user?.email && String(r.email).toLowerCase() === String(store.user?.email || '').toLowerCase()))
+    );
     const seatsPct = Math.round(((evt.seatsFilled || 0) / evt.seatsTotal) * 100);
 
     let statusBadge = '';
@@ -272,7 +278,13 @@ export class DiscoverView {
   }
 
   renderListCard(evt) {
-    const isRegistered = store.registrations.some(r => r.eventId === evt.id);
+    const isRegistered = store.registrations.some(r => 
+      (String(r.eventId).toLowerCase() === String(evt.id).toLowerCase() ||
+       (evt.slug && String(r.eventId).toLowerCase() === String(evt.slug).toLowerCase()) ||
+       (evt.title && String(r.eventName).toLowerCase() === String(evt.title).toLowerCase())) &&
+      (String(r.rollNo).toLowerCase() === String(store.user?.rollNo || '').toLowerCase() ||
+       (store.user?.email && String(r.email).toLowerCase() === String(store.user?.email || '').toLowerCase()))
+    );
     const seatsPct = Math.round(((evt.seatsFilled || 0) / evt.seatsTotal) * 100);
 
     return `
@@ -411,7 +423,9 @@ export class DiscoverView {
 
     // Card Register
     this.container.querySelectorAll('.btn-card-quick-reg').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const id = btn.getAttribute('data-event-id');
         sound.playClick();
         window.appDispatcher?.openRegistration(id);
@@ -420,25 +434,12 @@ export class DiscoverView {
 
     // Card View Pass
     this.container.querySelectorAll('.btn-card-view-pass').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const evtId = btn.getAttribute('data-ticket-id');
         sound.playClick();
-        const reg = store.registrations.find(r => 
-          String(r.eventId).toLowerCase() === String(evtId).toLowerCase() ||
-          (r.slug && String(r.slug).toLowerCase() === String(evtId).toLowerCase())
-        );
-        if (reg) {
-          window.appDispatcher?.openTicketModal(reg.ticketId);
-        } else {
-          const evt = store.events.find(e => String(e.id).toLowerCase() === String(evtId).toLowerCase());
-          const altReg = store.registrations.find(r => 
-            (evt && evt.slug && String(r.eventId).toLowerCase() === String(evt.slug).toLowerCase()) ||
-            (evt && String(r.eventName).toLowerCase() === String(evt.title).toLowerCase())
-          );
-          if (altReg) {
-            window.appDispatcher?.openTicketModal(altReg.ticketId);
-          }
-        }
+        window.appDispatcher?.openTicketModal(evtId);
       });
     });
   }

@@ -105,8 +105,11 @@ export class EventPageView {
   renderEventPage() {
     const evt = this.event;
     const userReg = store.registrations.find(r => 
-      String(r.eventId).toLowerCase() === String(evt.id).toLowerCase() ||
-      (evt.slug && String(r.eventId).toLowerCase() === String(evt.slug).toLowerCase())
+      (String(r.eventId).toLowerCase() === String(evt.id).toLowerCase() ||
+       (evt.slug && String(r.eventId).toLowerCase() === String(evt.slug).toLowerCase()) ||
+       (evt.title && String(r.eventName).toLowerCase() === String(evt.title).toLowerCase())) &&
+      (String(r.rollNo).toLowerCase() === String(store.user?.rollNo || '').toLowerCase() ||
+       (store.user?.email && String(r.email).toLowerCase() === String(store.user?.email || '').toLowerCase()))
     );
     const isRegistered = Boolean(userReg);
     const seatsTotal = parseInt(evt.seatsTotal) || 120;
@@ -451,9 +454,11 @@ export class EventPageView {
       }
     });
 
-    // Registration modals
+    // Registration modals (Register for Event and Claim Lab Bench)
     this.container.querySelectorAll('#btn-hero-register, #btn-sidebar-register').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         sound.playClick();
         window.appDispatcher?.openRegistration(evt.id);
       });
@@ -461,17 +466,11 @@ export class EventPageView {
 
     // View existing pass
     this.container.querySelectorAll('#btn-hero-view-pass, #btn-sidebar-view-pass').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         sound.playClick();
-        const userReg = store.registrations.find(r => 
-          String(r.eventId).toLowerCase() === String(evt.id).toLowerCase() ||
-          (evt.slug && String(r.eventId).toLowerCase() === String(evt.slug).toLowerCase())
-        );
-        if (userReg) {
-          window.appDispatcher?.openTicketModal(userReg.ticketId);
-        } else {
-          toast.show({ title: 'Pass Status', message: 'No active ticket found for this event.', type: 'info' });
-        }
+        window.appDispatcher?.openTicketModal(evt.id);
       });
     });
 
