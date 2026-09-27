@@ -1,0 +1,17 @@
+{
+  "name": "kiit-ieee",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "KIIT IEEE Student Branch Platform - Where Students Build What's Next",
+  "scripts": {
+    "start": "python server.py"
+  },
+  "keywords": [
+    "kiit",
+    "ieee",
+    "platform",
+    "student-branch"
+  ],
+  "author": "KIIT IEEE",
+  "license": "MIT"
+}
