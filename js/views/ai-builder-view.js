@@ -1285,6 +1285,9 @@ export class AIBuilderView {
 
       // Mark event changed to update WhatsApp announcement and poster staleness
       this.markEventChanged('ai-helper');
+      this.renderPosterCanvas();
+      this.posterVersion = this.eventVersion;
+      this.updatePosterStaleStatus();
 
       sound.playSuccess();
 

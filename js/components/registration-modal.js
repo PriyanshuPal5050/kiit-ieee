@@ -132,7 +132,14 @@ export class RegistrationModal {
 
     const mentionedYears = [];
     for (const [yKey, aliases] of Object.entries(yearMap)) {
-      if (aliases.some(a => eligLower.includes(`${a} year`) || eligLower.includes(`${a} yr`) || eligLower.includes(`${a}&`) || eligLower.includes(`${a} &`))) {
+      if (aliases.some(a =>
+        eligLower.includes(`${a} year`) ||
+        eligLower.includes(`${a} yr`) ||
+        eligLower.includes(`${a}&`) ||
+        eligLower.includes(`${a} &`) ||
+        eligLower.includes(`${a},`) ||   // e.g. "2nd, 3rd & 4th Year"
+        eligLower.includes(`${a} ,`)
+      )) {
         mentionedYears.push(yKey);
       }
     }

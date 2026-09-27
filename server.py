@@ -455,16 +455,24 @@ def parse_local_event_instruction(instruction, current_event):
             msg_parts.append(f"Venue updated to {changes['venue']}")
 
     # 6. Timing (Start Time & End Time)
-    time_match = re.search(r'(?:timing|time)\s*(?:to|is|=)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*(?:to|–|-)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)', text, re.I)
+    time_match = re.search(r'(?:timing|time)\s*(?:to|is|=|from)?\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*(?:to|–|-|and)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)', text, re.I)
     if time_match:
-        st = normalize_time_str(time_match.group(1))
-        et = normalize_time_str(time_match.group(2))
+        t1 = time_match.group(1).strip()
+        t2 = time_match.group(2).strip()
+        if not re.search(r'[ap]m', t1, re.I) and re.search(r'[ap]m', t2, re.I):
+            mer = re.search(r'[ap]m', t2, re.I).group(0)
+            m_h1 = int(re.match(r'\d+', t1).group(0))
+            m_h2 = int(re.match(r'\d+', t2).group(0))
+            if m_h1 < 12 and mer.lower() == 'pm' and (m_h1 <= m_h2 or m_h1 >= 9):
+                t1 = f"{t1} {mer}"
+        st = normalize_time_str(t1)
+        et = normalize_time_str(t2)
         changes['startTime'] = st
         changes['endTime'] = et
-        msg_parts.append(f"Timing set to {st}–{et}")
+        msg_parts.append(f"Timing set to {st} - {et}")
 
     # 7. Reporting Time
-    rep_match = re.search(r'reporting(?:\s*time)?\s*(?:to|is|=|should be)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)', text, re.I)
+    rep_match = re.search(r'reporting(?:\s*time)?\s*(?:to|is|=|should be|at)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)', text, re.I)
     if rep_match:
         rt = normalize_time_str(rep_match.group(1))
         changes['reportingTime'] = rt
@@ -474,6 +482,7 @@ def parse_local_event_instruction(instruction, current_event):
     seats_match = re.search(r'(?:seats?|capacity)\s*(?:to|is|=)\s*(\d+)', text, re.I)
     if seats_match:
         changes['seats'] = int(seats_match.group(1))
+        changes['seatsTotal'] = int(seats_match.group(1))
         msg_parts.append(f"Seats updated to {changes['seats']}")
 
     # 9. Registration Fee
@@ -488,9 +497,24 @@ def parse_local_event_instruction(instruction, current_event):
     if title_match:
         t_val = title_match.group(1).strip().strip("'\"")
         changes['eventName'] = t_val
+        changes['title'] = t_val
         msg_parts.append(f"Event title changed to '{t_val}'")
 
-    # 11. Poster Instructions
+    # 11. Eligibility
+    elig_match = re.search(r'eligibility\s*(?:to|is|=)\s*([^,\.]+)', text, re.I)
+    if elig_match:
+        e_val = elig_match.group(1).strip()
+        changes['eligibility'] = e_val
+        msg_parts.append(f"Eligibility updated to {e_val}")
+
+    # 12. Prerequisites
+    prereq_match = re.search(r'prerequisites?\s*(?:to|is|=)\s*([^,\.]+)', text, re.I)
+    if prereq_match:
+        p_val = prereq_match.group(1).strip()
+        changes['prerequisites'] = p_val
+        msg_parts.append(f"Prerequisites updated")
+
+    # 13. Poster Instructions
     t_lower = text.lower()
     if 'poster' in t_lower:
         if 'formal' in t_lower or 'corporate' in t_lower:
@@ -779,7 +803,15 @@ def check_student_eligibility(eligibility_str, student_year, student_branch):
     }
     mentioned_years = []
     for y_key, aliases in year_map.items():
-        if any(f"{a} year" in elig_lower or f"{a} yr" in elig_lower or f"{a}&" in elig_lower or f"{a} &" in elig_lower for a in aliases):
+        if any(
+            f"{a} year" in elig_lower or
+            f"{a} yr" in elig_lower or
+            f"{a}&" in elig_lower or
+            f"{a} &" in elig_lower or
+            f"{a}," in elig_lower or  # e.g. "2nd, 3rd & 4th Year"
+            f"{a} ," in elig_lower
+            for a in aliases
+        ):
             mentioned_years.append(y_key)
 
     if mentioned_years:
